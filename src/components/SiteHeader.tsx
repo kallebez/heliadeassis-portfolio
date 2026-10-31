@@ -33,7 +33,8 @@ export function SiteFooter() {
   return (
     <footer className="mt-24 border-t">
       <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Helia de Assis · Psicanalista e Terapeuta Cristã
+        © {new Date().getFullYear()} Helia de Assis · Psicanalista e Terapeuta Cristã ·{" "}
+        <Link to="/admin" className="hover:text-primary">Painel</Link>
       </div>
     </footer>
   );
