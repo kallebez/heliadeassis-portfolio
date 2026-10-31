@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { data: c } = useSuspenseQuery(contentQuery);
-  const servicos = [1, 2, 3].map((n) => ({
+  const servicos = ([1, 2, 3] as const).map((n) => ({
     t: c[`servico${n}_titulo` as const],
     d: c[`servico${n}_texto` as const],
   }));

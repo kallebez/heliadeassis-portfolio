@@ -154,7 +154,10 @@ function Editor({ userId }: { userId: string }) {
     const rows = (Object.keys(defaults) as ContentKey[]).map((key) => ({ key, value: form![key], updated_at: new Date().toISOString() }));
     const { error } = await supabase.from("site_content").upsert(rows);
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar. Tente novamente.");
+    if (error) {
+      toast.error("Não foi possível salvar. Tente novamente.");
+      return;
+    }
     await qc.invalidateQueries({ queryKey: contentQuery.queryKey });
     toast.success("Alterações salvas! O site já foi atualizado.");
   }
