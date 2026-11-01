@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { contentQuery } from "@/lib/content";
+import { contentQuery, defaults } from "@/lib/content";
 
 const links = [
   { to: "/", label: "Início" },
@@ -83,16 +83,17 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { data: c } = useQuery({ ...contentQuery, enabled: !pathname.startsWith("/admin") });
+  const { data } = useQuery(contentQuery);
   if (pathname.startsWith("/admin")) return null;
+  const c = data ?? defaults;
 
-  const insta = (c?.instagram ?? "").replace(/^@/, "");
+  const insta = c.instagram.replace(/^@/, "");
   return (
     <footer className="mt-24 border-t bg-card">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-3">
         <div>
-          <p className="font-display text-2xl text-foreground">{c?.nome ?? "Helia de Assis"}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{c?.subtitulo ?? "Psicanalista · Terapeuta Cristã"}</p>
+          <p className="font-display text-2xl text-foreground">{c.nome}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{c.subtitulo}</p>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             Todo atendimento é confidencial e segue o código de ética da profissão.
           </p>
@@ -112,16 +113,14 @@ export function SiteFooter() {
         <div>
           <p className="mb-3 text-sm uppercase tracking-widest text-muted-foreground">Contato</p>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            {c?.whatsapp && <li>WhatsApp: {c.whatsapp}</li>}
-            {c?.email && <li>E-mail: {c.email}</li>}
-            {insta && (
-              <li>
-                Instagram:{" "}
-                <a href={`https://instagram.com/${insta}`} target="_blank" rel="noreferrer" className="hover:text-primary">
-                  @{insta}
-                </a>
-              </li>
-            )}
+            <li>WhatsApp: {c.whatsapp}</li>
+            <li>E-mail: {c.email}</li>
+            <li>
+              Instagram:{" "}
+              <a href={`https://instagram.com/${insta}`} target="_blank" rel="noreferrer" className="hover:text-primary">
+                @{insta}
+              </a>
+            </li>
           </ul>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
