@@ -274,11 +274,11 @@ function Editor({ userId }: { userId: string }) {
                   <Label htmlFor={`faq-q-${i}`}>Pergunta {i + 1}</Label>
                   <div className="flex gap-1">
                     <Button type="button" variant="ghost" size="icon" aria-label="Mover para cima" disabled={i === 0}
-                      onClick={() => setFaq((f) => { const c = [...f!]; [c[i - 1], c[i]] = [c[i], c[i - 1]]; return c; })}>
+                      onClick={() => setFaq((f) => { const c = [...f!]; const t = c[i - 1]!; c[i - 1] = c[i]!; c[i] = t; return c; })}>
                       <ArrowUp className="h-4 w-4" />
                     </Button>
                     <Button type="button" variant="ghost" size="icon" aria-label="Mover para baixo" disabled={i === faq.length - 1}
-                      onClick={() => setFaq((f) => { const c = [...f!]; [c[i + 1], c[i]] = [c[i], c[i + 1]]; return c; })}>
+                      onClick={() => setFaq((f) => { const c = [...f!]; const t = c[i + 1]!; c[i + 1] = c[i]!; c[i] = t; return c; })}>
                       <ArrowDown className="h-4 w-4" />
                     </Button>
                     <Button type="button" variant="ghost" size="icon" aria-label="Remover pergunta"
