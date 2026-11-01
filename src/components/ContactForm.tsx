@@ -63,25 +63,25 @@ export function ContactForm() {
       <div className="space-y-2">
         <Label htmlFor="cf-name">Nome</Label>
         <Input id="cf-name" value={form.name} onChange={(e) => set("name", e.target.value)} autoComplete="name" />
-        {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+        {errors["name"] && <p className="text-sm text-destructive">{errors["name"]}</p>}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="cf-whats">WhatsApp (com DDD)</Label>
         <Input id="cf-whats" value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} inputMode="tel" autoComplete="tel" placeholder="(00) 00000-0000" />
-        {errors.whatsapp && <p className="text-sm text-destructive">{errors.whatsapp}</p>}
+        {errors["whatsapp"] && <p className="text-sm text-destructive">{errors["whatsapp"]}</p>}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="cf-email">E-mail (opcional)</Label>
         <Input id="cf-email" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} autoComplete="email" />
-        {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+        {errors["email"] && <p className="text-sm text-destructive">{errors["email"]}</p>}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="cf-msg">Como posso te ajudar?</Label>
         <Textarea id="cf-msg" rows={4} value={form.message} onChange={(e) => set("message", e.target.value)} />
-        {errors.message && <p className="text-sm text-destructive">{errors.message}</p>}
+        {errors["message"] && <p className="text-sm text-destructive">{errors["message"]}</p>}
       </div>
 
       {/* Honeypot anti-spam: invisível para pessoas, preenchido por robôs */}
@@ -101,7 +101,7 @@ export function ContactForm() {
           <a href="/privacidade" className="underline hover:text-primary">Política de Privacidade</a>.
         </Label>
       </div>
-      {errors.consent && <p className="text-sm text-destructive">{errors.consent}</p>}
+      {errors["consent"] && <p className="text-sm text-destructive">{errors["consent"]}</p>}
 
       <Button type="submit" size="lg" className="w-full" disabled={sending}>
         {sending ? "Enviando…" : "Enviar mensagem"}
