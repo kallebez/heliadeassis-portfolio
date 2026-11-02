@@ -320,19 +320,20 @@ function Editor({ userId }: { userId: string }) {
 
       {tab === "conteudo" && (
         <div className="space-y-10">
+          <div className="space-y-4 rounded-2xl bg-card p-6">
+            <h2 className="text-3xl">Foto da página inicial</h2>
+            <p className="text-sm text-muted-foreground">É esta foto que aparece ao lado do título, na abertura do site. Escolha outra para trocá-la. Se remover, volta a foto padrão.</p>
+            <ImageField id="inicio_foto" label="Foto da página inicial" value={form.inicio_foto}
+              onChange={(v) => set("inicio_foto", v)} resetLabel="Voltar à foto original" />
+          </div>
           {sections.map((s) => (
             <div key={s.title} className="space-y-4 rounded-2xl bg-card p-6">
               <h2 className="text-3xl">{s.title}</h2>
               {s.fields.map((f) => (
                 <div key={f.key} className="space-y-2">
-                  <Label htmlFor={f.key}>{f.label}</Label>
+                  {f.image ? <Label className="text-base">{f.label}</Label> : <Label htmlFor={f.key}>{f.label}</Label>}
                   {f.image ? (
-                    <div className="space-y-2">
-                      {form[f.key] && <img src={form[f.key]} alt="" className="h-40 rounded-lg object-cover" />}
-                      <Input id={f.key} type="file" accept="image/*"
-                        onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; try { set(f.key, await resizeImage(file)); } catch { toast.error("Não foi possível abrir essa foto. Tente outra imagem."); } }} />
-                      {form[f.key] && <Button type="button" variant="ghost" size="sm" onClick={() => set(f.key, "")}>Voltar à foto original</Button>}
-                    </div>
+                    <ImageField id={f.key} label={f.label} value={form[f.key]} onChange={(v) => set(f.key, v)} resetLabel="Remover foto" />
                   ) : f.long ? (
                     <Textarea id={f.key} rows={f.key === "sobre_texto" ? 8 : 3} value={form[f.key]} onChange={(e) => set(f.key, e.target.value)} />
                   ) : (
