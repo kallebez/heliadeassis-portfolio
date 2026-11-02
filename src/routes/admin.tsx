@@ -189,17 +189,59 @@ function Login() {
   );
 }
 
-async function resizeImage(file: File): Promise<string> {
+async function prepareImage(file: File): Promise<string> {
+  if (!isSupportedImage(file)) throw new Error("Formato não suportado.");
+  if (isImageTooLarge(file)) throw new Error("Foto muito grande.");
   const img = await createImageBitmap(file);
-  const scale = Math.min(1, 1000 / Math.max(img.width, img.height));
+  const scale = imageScale(img.width, img.height);
   const canvas = document.createElement("canvas");
-  canvas.width = Math.round(img.width * scale);
-  canvas.height = Math.round(img.height * scale);
+  canvas.width = Math.max(1, Math.round(img.width * scale));
+  canvas.height = Math.max(1, Math.round(img.height * scale));
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Não foi possível preparar a foto.");
   context.drawImage(img, 0, 0, canvas.width, canvas.height);
   img.close();
-  return canvas.toDataURL("image/jpeg", 0.8);
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  return canvas.toDataURL(imageOutputType(file.type, hasTransparency(pixels)), 0.8);
+}
+
+function ImageField({ id, label, value, onChange, resetLabel }: {
+  id: string; label: string; value: string; onChange: (value: string) => void; resetLabel: string;
+}) {
+  const [busy, setBusy] = useState(false);
+  async function pick(file?: File) {
+    if (!file) return;
+    setBusy(true);
+    try {
+      onChange(await prepareImage(file));
+      toast.success("Foto pronta! Clique em Salvar alterações para publicar.");
+    } catch {
+      toast.error("Não foi possível usar essa foto. Escolha um PNG, JPG ou WebP de até 8 MB.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-5">
+      {value ? (
+        <img src={value} alt={`Foto atual: ${label}`} className="h-36 w-36 rounded-xl border object-cover" />
+      ) : (
+        <div className="grid h-36 w-36 place-items-center rounded-xl border border-dashed px-3 text-center text-xs text-muted-foreground">
+          Nenhuma foto enviada
+        </div>
+      )}
+      <div className="space-y-2">
+        <Label htmlFor={id} className="inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition hover:border-primary hover:text-primary">
+          <ImagePlus className="h-4 w-4" /> {value ? "Trocar foto" : "Escolher foto"}
+        </Label>
+        <Input id={id} type="file" accept="image/png, image/jpeg, image/webp" className="sr-only"
+          onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; void pick(file); }} />
+        <p className="text-xs text-muted-foreground">PNG, JPG ou WebP · até 8 MB · PNG com fundo transparente continua PNG.</p>
+        {busy && <p className="text-xs text-muted-foreground">Preparando foto…</p>}
+        {value && <Button type="button" variant="ghost" size="sm" onClick={() => onChange("")}>{resetLabel}</Button>}
+      </div>
+    </div>
+  );
 }
 
 function Editor({ userId }: { userId: string }) {
