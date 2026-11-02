@@ -7,6 +7,8 @@ export const Route = createFileRoute("/termos")({
       { name: "description", content: "Termos de uso do site de Helia de Assis, psicanalista e terapeuta cristã." },
       { property: "og:title", content: "Termos de Uso — Helia de Assis" },
       { property: "og:description", content: "Termos de uso do site." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Termos,

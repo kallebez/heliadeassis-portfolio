@@ -17,6 +17,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Psicanálise e terapia cristã com acolhimento, escuta e fé. Atendimento online e presencial. Conheça o trabalho de Helia de Assis." },
       { property: "og:title", content: "Helia de Assis — Psicanalista e Terapeuta Cristã" },
       { property: "og:description", content: "Psicanálise e terapia cristã com acolhimento, escuta e fé." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     scripts: [
       {

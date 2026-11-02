@@ -10,6 +10,8 @@ export const Route = createFileRoute("/sobre")({
       { name: "description", content: "Conheça a história, formação e valores de Helia de Assis, psicanalista e terapeuta cristã." },
       { property: "og:title", content: "Sobre mim — Helia de Assis" },
       { property: "og:description", content: "História, formação e valores de Helia de Assis." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(contentQuery),

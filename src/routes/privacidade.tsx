@@ -9,6 +9,8 @@ export const Route = createFileRoute("/privacidade")({
       { name: "description", content: "Como tratamos os dados enviados pelo formulário de contato, conforme a LGPD." },
       { property: "og:title", content: "Política de Privacidade — Helia de Assis" },
       { property: "og:description", content: "Como tratamos os dados enviados pelo formulário de contato, conforme a LGPD." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(contentQuery),

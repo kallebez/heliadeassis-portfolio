@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { csvCell, moveItem } from "@/lib/admin-utils";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -20,6 +21,8 @@ export const Route = createFileRoute("/admin")({
       { property: "og:title", content: "Painel — Helia de Assis" },
       { property: "og:description", content: "Painel para editar o conteúdo do site." },
       { name: "robots", content: "noindex" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Admin,
@@ -94,16 +97,48 @@ const sections: { title: string; fields: Field[] }[] = [
 function Admin() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true); });
-    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    const { data } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s);
+      if (event === "PASSWORD_RECOVERY") setRecovering(true);
+    });
     return () => data.subscription.unsubscribe();
   }, []);
   if (!ready) return null;
   return (
     <section className="mx-auto max-w-3xl px-6 py-12">
-      {session ? <Editor userId={session.user.id} /> : <Login />}
+      {session ? recovering ? <ChangePassword onComplete={() => setRecovering(false)} /> : <Editor userId={session.user.id} /> : <Login />}
     </section>
+  );
+}
+
+function ChangePassword({ onComplete }: { onComplete: () => void }) {
+  const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (password !== confirmation) { toast.error("As senhas precisam ser iguais."); return; }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      toast.success("Senha atualizada.");
+      onComplete();
+    } catch { toast.error("Não foi possível atualizar sua senha. Solicite um novo link e tente novamente."); }
+    finally { setBusy(false); }
+  }
+  return (
+    <form onSubmit={submit} className="mx-auto max-w-sm space-y-4 rounded-lg bg-card p-8">
+      <h1 className="text-4xl">Definir nova senha</h1>
+      <div className="space-y-2"><Label htmlFor="new-password">Nova senha</Label>
+        <Input id="new-password" type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+      <div className="space-y-2"><Label htmlFor="confirm-password">Confirmar senha</Label>
+        <Input id="confirm-password" type="password" autoComplete="new-password" minLength={6} required value={confirmation} onChange={(e) => setConfirmation(e.target.value)} /></div>
+      <Button type="submit" className="w-full" disabled={busy}>{busy ? "Salvando…" : "Salvar nova senha"}</Button>
+    </form>
   );
 }
 
@@ -160,7 +195,10 @@ async function resizeImage(file: File): Promise<string> {
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(img.width * scale);
   canvas.height = Math.round(img.height * scale);
-  canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Não foi possível preparar a foto.");
+  context.drawImage(img, 0, 0, canvas.width, canvas.height);
+  img.close();
   return canvas.toDataURL("image/jpeg", 0.8);
 }
 
@@ -200,8 +238,9 @@ function Editor({ userId }: { userId: string }) {
     );
 
   async function save() {
+    if (!form || !faq || !depoimentos) return;
     setSaving(true);
-    const all: SiteContent = { ...form!, faq_json: JSON.stringify(faq), depoimentos_json: JSON.stringify(depoimentos) };
+    const all: SiteContent = { ...form, faq_json: JSON.stringify(faq), depoimentos_json: JSON.stringify(depoimentos) };
     const rows = (Object.keys(defaults) as ContentKey[]).map((key) => ({ key, value: all[key], updated_at: new Date().toISOString() }));
     const { error } = await supabase.from("site_content").upsert(rows);
     setSaving(false);
@@ -213,7 +252,7 @@ function Editor({ userId }: { userId: string }) {
     toast.success("Alterações salvas! O site já foi atualizado.");
   }
 
-  const set = (k: ContentKey, v: string) => setForm((f) => ({ ...f!, [k]: v }));
+  const set = (k: ContentKey, v: string) => setForm((f) => f ? ({ ...f, [k]: v }) : f);
 
   const tabs = [
     { id: "conteudo", label: "Textos e fotos" },
@@ -227,13 +266,13 @@ function Editor({ userId }: { userId: string }) {
         <h1 className="text-4xl">Editar site</h1>
         <Button variant="outline" onClick={signOut}>Sair</Button>
       </div>
-      <div className="flex gap-2 border-b" role="tablist">
+      <div className="flex flex-wrap gap-2 border-b" role="tablist">
         {tabs.map((t) => (
-          <button key={t.id} role="tab" aria-selected={tab === t.id}
+          <Button variant="ghost" key={t.id} role="tab" aria-selected={tab === t.id}
             className={`px-4 py-2 text-sm transition-colors ${tab === t.id ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-primary"}`}
             onClick={() => setTab(t.id)}>
             {t.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -249,7 +288,7 @@ function Editor({ userId }: { userId: string }) {
                     <div className="space-y-2">
                       {form[f.key] && <img src={form[f.key]} alt="" className="h-40 rounded-lg object-cover" />}
                       <Input id={f.key} type="file" accept="image/*"
-                        onChange={async (e) => { const file = e.target.files?.[0]; if (file) set(f.key, await resizeImage(file)); }} />
+                        onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; try { set(f.key, await resizeImage(file)); } catch { toast.error("Não foi possível abrir essa foto. Tente outra imagem."); } }} />
                       {form[f.key] && <Button type="button" variant="ghost" size="sm" onClick={() => set(f.key, "")}>Voltar à foto original</Button>}
                     </div>
                   ) : f.long ? (
@@ -274,24 +313,24 @@ function Editor({ userId }: { userId: string }) {
                   <Label htmlFor={`faq-q-${i}`}>Pergunta {i + 1}</Label>
                   <div className="flex gap-1">
                     <Button type="button" variant="ghost" size="icon" aria-label="Mover para cima" disabled={i === 0}
-                      onClick={() => setFaq((f) => { const c = [...f!]; const t = c[i - 1]!; c[i - 1] = c[i]!; c[i] = t; return c; })}>
+                      onClick={() => setFaq((f) => moveItem(f, i, -1))}>
                       <ArrowUp className="h-4 w-4" />
                     </Button>
                     <Button type="button" variant="ghost" size="icon" aria-label="Mover para baixo" disabled={i === faq.length - 1}
-                      onClick={() => setFaq((f) => { const c = [...f!]; const t = c[i + 1]!; c[i + 1] = c[i]!; c[i] = t; return c; })}>
+                      onClick={() => setFaq((f) => moveItem(f, i, 1))}>
                       <ArrowDown className="h-4 w-4" />
                     </Button>
                     <Button type="button" variant="ghost" size="icon" aria-label="Remover pergunta"
-                      onClick={() => { if (window.confirm("Remover esta pergunta?")) setFaq((f) => f!.filter((_, j) => j !== i)); }}>
+                      onClick={() => { if (window.confirm("Remover esta pergunta?")) setFaq((f) => f?.filter((_, j) => j !== i) ?? null); }}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <Input id={`faq-q-${i}`} value={item.q} onChange={(e) => setFaq((f) => f!.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)))} />
-                <Textarea rows={3} value={item.a} aria-label={`Resposta ${i + 1}`} onChange={(e) => setFaq((f) => f!.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)))} />
+                <Input id={`faq-q-${i}`} value={item.q} onChange={(e) => setFaq((f) => f?.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)) ?? null)} />
+                <Textarea rows={3} value={item.a} aria-label={`Resposta ${i + 1}`} onChange={(e) => setFaq((f) => f?.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)) ?? null)} />
               </div>
             ))}
-            <Button type="button" variant="outline" onClick={() => setFaq((f) => [...f!, { q: "", a: "" }])}>
+            <Button type="button" variant="outline" onClick={() => setFaq((f) => [...(f ?? []), { q: "", a: "" }])}>
               <Plus className="mr-2 h-4 w-4" /> Adicionar pergunta
             </Button>
           </div>
@@ -304,15 +343,15 @@ function Editor({ userId }: { userId: string }) {
                 <div className="flex items-center justify-between gap-2">
                   <Label htmlFor={`dep-n-${i}`}>Nome ou iniciais</Label>
                   <Button type="button" variant="ghost" size="icon" aria-label="Remover depoimento"
-                    onClick={() => { if (window.confirm("Remover este depoimento?")) setDepoimentos((f) => f!.filter((_, j) => j !== i)); }}>
+                    onClick={() => { if (window.confirm("Remover este depoimento?")) setDepoimentos((f) => f?.filter((_, j) => j !== i) ?? null); }}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <Input id={`dep-n-${i}`} value={d.nome} onChange={(e) => setDepoimentos((f) => f!.map((x, j) => (j === i ? { ...x, nome: e.target.value } : x)))} />
-                <Textarea rows={3} value={d.texto} aria-label={`Depoimento ${i + 1}`} onChange={(e) => setDepoimentos((f) => f!.map((x, j) => (j === i ? { ...x, texto: e.target.value } : x)))} />
+                <Input id={`dep-n-${i}`} value={d.nome} onChange={(e) => setDepoimentos((f) => f?.map((x, j) => (j === i ? { ...x, nome: e.target.value } : x)) ?? null)} />
+                <Textarea rows={3} value={d.texto} aria-label={`Depoimento ${i + 1}`} onChange={(e) => setDepoimentos((f) => f?.map((x, j) => (j === i ? { ...x, texto: e.target.value } : x)) ?? null)} />
               </div>
             ))}
-            <Button type="button" variant="outline" onClick={() => setDepoimentos((f) => [...f!, { nome: "", texto: "" }])}>
+            <Button type="button" variant="outline" onClick={() => setDepoimentos((f) => [...(f ?? []), { nome: "", texto: "" }])}>
               <Plus className="mr-2 h-4 w-4" /> Adicionar depoimento
             </Button>
           </div>
@@ -358,9 +397,8 @@ function Mensagens() {
 
   function exportarCsv() {
     const rows = mensagens.data ?? [];
-    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
     const csv = ["Data;Nome;WhatsApp;E-mail;Mensagem;Lida"]
-      .concat(rows.map((m) => [new Date(m.created_at).toLocaleString("pt-BR"), m.name, m.whatsapp, m.email ?? "", m.message, m.read ? "sim" : "não"].map(esc).join(";")))
+      .concat(rows.map((m) => [new Date(m.created_at).toLocaleString("pt-BR"), m.name, m.whatsapp, m.email ?? "", m.message, m.read ? "sim" : "não"].map(csvCell).join(";")))
       .join("\n");
     const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
