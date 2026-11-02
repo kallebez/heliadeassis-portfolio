@@ -11,5 +11,5 @@
 - [x] SEO: JSON-LD, robots.txt bloqueando /admin, sitemap.xml e metadados por página
 - [ ] Notificação por e-mail a cada mensagem (bloqueado: precisa de domínio de e-mail próprio)
 - [ ] Dados reais (WhatsApp, e-mail, Instagram, cidade, formação): aguardando a cliente preencher no admin
-- [ ] Testes e verificação final do painel, salvamento, reordenação e exportação
+- [x] Testes e verificação final: 10 testes aprovados; envio e leitura no painel, salvamento com leitura pública, reordenação, exportação e exclusão conferidos; conteúdo restaurado e mensagem de teste excluída
 - [ ] Entrega e uso do link de recuperação de senha (bloqueado: requer acesso à caixa de e-mail)
