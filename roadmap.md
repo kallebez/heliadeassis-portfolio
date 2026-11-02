@@ -11,5 +11,6 @@
 - [x] SEO: JSON-LD, robots.txt bloqueando /admin, sitemap.xml e metadados por página
 - [ ] Notificação por e-mail a cada mensagem (bloqueado: precisa de domínio de e-mail próprio)
 - [ ] Dados reais (WhatsApp, e-mail, Instagram, cidade, formação): aguardando a cliente preencher no admin
-- [x] Testes e verificação final: 10 testes aprovados; envio e leitura no painel, salvamento com leitura pública, reordenação, exportação e exclusão conferidos; conteúdo restaurado e mensagem de teste excluída
+- [x] Testes e verificação final: 19 testes aprovados; envio e leitura no painel, salvamento com leitura pública, reordenação, exportação e exclusão conferidos; conteúdo restaurado e mensagem de teste excluída
+- [x] Painel: card "Foto da página inicial" para trocar a foto da abertura, aceitando PNG (mantém transparência), JPG e WebP até 8 MB
 - [ ] Entrega e uso do link de recuperação de senha (bloqueado: requer acesso à caixa de e-mail)

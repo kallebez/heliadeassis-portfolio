@@ -10,4 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Keep reusable admin list ordering and CSV escaping in browser-safe utilities so their behavior can be tested without authentication.
+- Keep admin photo upload rules (accepted formats, size cap, downscaling, keeping PNG transparency) in a browser-safe utility so they can be tested without authentication.
 - Password recovery must handle the auth recovery event and show a new-password form before the editor.
