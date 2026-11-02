@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep reusable admin list ordering and CSV escaping in browser-safe utilities so their behavior can be tested without authentication.
+- Password recovery must handle the auth recovery event and show a new-password form before the editor.

@@ -11,6 +11,8 @@ export const Route = createFileRoute("/contato")({
       { name: "description", content: "Agende uma conversa com Helia de Assis, psicanalista e terapeuta cristã. Atendimento online e presencial." },
       { property: "og:title", content: "Contato — Helia de Assis" },
       { property: "og:description", content: "Agende uma conversa com Helia de Assis." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(contentQuery),
