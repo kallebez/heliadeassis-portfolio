@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ImagePlus, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { contentQuery, defaults, parseDepoimentos, parseFaq, type ContentKey, type Depoimento, type FaqItem, type SiteContent } from "@/lib/content";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { csvCell, moveItem } from "@/lib/admin-utils";
+import { hasTransparency, imageOutputType, imageScale, isImageTooLarge, isSupportedImage } from "@/lib/image-utils";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -36,7 +37,6 @@ const sections: { title: string; fields: Field[] }[] = [
     fields: [
       { key: "inicio_titulo", label: "Título principal" },
       { key: "inicio_texto", label: "Texto de apresentação", long: true },
-      { key: "inicio_foto", label: "Foto principal", image: true },
       { key: "versiculo", label: "Versículo", long: true },
       { key: "versiculo_ref", label: "Referência do versículo" },
     ],
