@@ -15,6 +15,13 @@
       "when": 1793502373265,
       "tag": "0001_create_contact_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793725973455,
+      "tag": "0002_tighten_contact_insert_and_drop_orphan_storage_policy",
+      "breakpoints": true
     }
   ]
 }
