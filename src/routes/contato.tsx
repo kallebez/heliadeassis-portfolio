@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Clock, MapPin, Timer } from "lucide-react";
 import { contentQuery, whatsappHref } from "@/lib/content";
 import { ContactForm } from "@/components/ContactForm";
+import { Reveal } from "@/components/Reveal";
 
 export const Route = createFileRoute("/contato")({
   head: () => ({
@@ -34,26 +35,28 @@ function Contato() {
   ];
   return (
     <section className="mx-auto max-w-5xl px-6 py-12 md:py-20">
-      <p className="mb-4 text-sm uppercase tracking-[0.2em] text-sage-deep">Contato</p>
-      <h1 className="fade-up text-5xl md:text-6xl">Vamos conversar?</h1>
-      <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">{c.contato_texto}</p>
+      <p className="fade-up mb-4 text-sm uppercase tracking-[0.2em] text-sage-deep" style={{ animationDelay: "0.1s" }}>Contato</p>
+      <h1 className="fade-up text-5xl md:text-6xl" style={{ animationDelay: "0.2s" }}>Vamos conversar?</h1>
+      <p className="fade-up mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground" style={{ animationDelay: "0.3s" }}>{c.contato_texto}</p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
-        {infos.map((i) => (
-          <div key={i.label} className="rounded-2xl bg-card p-5">
-            <i.icon className="h-5 w-5 text-sage-deep" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">{i.label}</p>
-            <p className="mt-1 text-sm font-medium text-foreground">{i.value}</p>
-          </div>
+        {infos.map((i, idx) => (
+          <Reveal key={i.label} delay={idx * 100} className="h-full">
+            <div className="card-lift h-full rounded-2xl bg-card p-5">
+              <i.icon className="h-5 w-5 text-sage-deep" aria-hidden="true" />
+              <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">{i.label}</p>
+              <p className="mt-1 text-sm font-medium text-foreground">{i.value}</p>
+            </div>
+          </Reveal>
         ))}
       </div>
 
       <div className="mt-12 grid gap-10 md:grid-cols-2">
-        <div>
+        <Reveal>
           <div className="divide-y border-y">
             {canais.map((ch) => (
               <a key={ch.label} href={ch.href} target="_blank" rel="noreferrer"
-                className="group flex items-center justify-between py-5 transition-colors hover:text-primary">
+                className="group flex items-center justify-between py-5 transition-colors duration-300 hover:text-primary">
                 <span className="text-sm uppercase tracking-widest text-muted-foreground">{ch.label}</span>
                 <span className="font-display text-xl md:text-2xl">{ch.value} →</span>
               </a>
@@ -61,12 +64,14 @@ function Contato() {
           </div>
           {c.agenda_link && (
             <a href={c.agenda_link} target="_blank" rel="noreferrer"
-              className="mt-6 inline-block rounded-full border px-6 py-3 transition hover:border-primary hover:text-primary">
+              className="mt-6 inline-block rounded-full border px-6 py-3 transition duration-300 hover:scale-105 hover:border-primary hover:text-primary">
               Ver agenda disponível
             </a>
           )}
-        </div>
-        <ContactForm />
+        </Reveal>
+        <Reveal delay={100}>
+          <ContactForm />
+        </Reveal>
       </div>
     </section>
   );
