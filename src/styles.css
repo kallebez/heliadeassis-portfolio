@@ -61,6 +61,7 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  html { scroll-behavior: smooth; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -69,10 +70,39 @@
   h1, h2, h3 { font-family: var(--font-display); font-weight: 400; }
 }
 
+/* Animação inicial (hero): fade-in + leve subida. Delay escalonado via style inline. */
 @utility fade-up {
   animation: fadeUp 0.9s ease-out both;
 }
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: none; }
+}
+
+/* Scroll reveal: usado pelo componente <Reveal /> (IntersectionObserver, uma vez só). */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hover de cards: leve subida + sombra. Só em dispositivos com mouse (não "gruda" no toque). */
+@utility card-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px -16px rgb(0 0 0 / 0.22);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .fade-up { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
 }
